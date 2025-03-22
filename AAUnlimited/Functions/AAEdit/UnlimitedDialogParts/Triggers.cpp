@@ -556,14 +556,19 @@ INT_PTR CALLBACK UnlimitedDialog::TRDialog::DialogProc(_In_ HWND hwndDlg,_In_ UI
 		return TRUE;
 		break; }
 	case WM_VKEYTOITEM: {
-		//DEL-key was pressed while the list box had the focus
-		TRDialog* thisPtr = (TRDialog*)GetWindowLongPtr(hwndDlg,GWLP_USERDATA);
+		TRDialog* thisPtr = (TRDialog*)GetWindowLongPtr(hwndDlg, GWLP_USERDATA);
 		if (LOWORD(wparam) == VK_DELETE) {
-			
-			
+			int sel = SendMessage(thisPtr->m_lbTriggers, LB_GETCURSEL, 0, 0);
+			if (sel != LB_ERR) {
+				auto& triggerList = g_currChar.m_cardData.GetTriggers();
+				if (sel >= 0 && sel < triggerList.size()) {
+					triggerList.erase(triggerList.begin() + sel);
+					SendMessage(thisPtr->m_lbTriggers, LB_DELETESTRING, sel, 0);
+				}
+			}
+			return TRUE;
 		}
 		break; }
-
 	case WM_COMMAND: {
 		TRDialog* thisPtr = (TRDialog*)GetWindowLongPtr(hwndDlg,GWLP_USERDATA);
 		switch (HIWORD(wparam)) {
@@ -611,6 +616,8 @@ INT_PTR CALLBACK UnlimitedDialog::TRDialog::DialogProc(_In_ HWND hwndDlg,_In_ UI
 					EnableMenuItem(subMenu,ID_TRM_DELETETRIGGER,MF_GRAYED);
 					EnableMenuItem(subMenu,ID_TRM_EXPORT,MF_GRAYED);
 					EnableMenuItem(subMenu,ID_TRM_RENAMETRIGGER,MF_GRAYED);
+					EnableMenuItem(subMenu,ID_TRM_COPYSEL,MF_GRAYED);
+					EnableMenuItem(subMenu,ID_TRM_PASTE,MF_GRAYED);
 				}
 
 				BOOL ret = TrackPopupMenu(subMenu,TPM_LEFTALIGN | TPM_RETURNCMD,
@@ -1057,6 +1064,18 @@ INT_PTR CALLBACK UnlimitedDialog::TRDialog::AddGlobalVariableDialogProc(_In_ HWN
 		}		
 		
 		return TRUE;
+		break; }
+	case WM_VKEYTOITEM: {
+		TRDialog* thisPtr = (TRDialog*)GetWindowLongPtr(hwndDlg, GWLP_USERDATA);
+		if (LOWORD(wparam) == VK_DELETE) {
+			int sel = SendMessage(GetDlgItem(hwndDlg, IDC_TR_GV_LBLIST), LB_GETCURSEL, 0, 0);
+			if (sel != LB_ERR) {
+				auto& list = g_currChar.m_cardData.GetGlobalVariables();
+				list.erase(list.begin() + sel);
+				SendMessage(GetDlgItem(hwndDlg, IDC_TR_GV_LBLIST), LB_DELETESTRING, sel, 0);
+			}
+			return TRUE;
+		}
 		break; }
 	case WM_COMMAND: {
 		DWORD identifier = LOWORD(wparam);

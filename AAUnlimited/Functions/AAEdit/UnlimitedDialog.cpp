@@ -763,7 +763,8 @@ INT_PTR CALLBACK UnlimitedDialog::MODialog::DialogProc(_In_ HWND hwndDlg, _In_ U
 			thisPtr->RefreshRuleList();
 			return TRUE;
 		}
-		break; }
+		break; 
+	}
 	case WM_COMMAND: {
 		MODialog* thisPtr = (MODialog*)GetWindowLongPtr(hwndDlg, GWLP_USERDATA);
 		switch (HIWORD(wparam)) {
